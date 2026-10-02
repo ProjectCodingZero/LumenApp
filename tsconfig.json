@@ -9,7 +9,8 @@
       "@/assets/*": [
         "./assets/*"
       ]
-    }
+    },
+    "customConditions": ["react-native", "react-native-legacy-deep-imports"]
   },
   "include": [
     "**/*.ts",
