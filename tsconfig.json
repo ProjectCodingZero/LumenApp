@@ -10,7 +10,8 @@
         "./assets/*"
       ]
     },
-    "customConditions": ["react-native", "react-native-legacy-deep-imports"]
+    "customConditions": ["react-native", "react-native-legacy-deep-imports"],
+    "jsx": "react-native"
   },
   "include": [
     "**/*.ts",
