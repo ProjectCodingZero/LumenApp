@@ -15,7 +15,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -45,7 +44,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -84,7 +83,7 @@ export default function LoginScreen() {
               <View style={[styles.tab, styles.activeTab]}>
                 <Text style={styles.activeTabText}>Iniciar Sesión</Text>
               </View>
-              <TouchableOpacity style={styles.tab} onPress={() => router.push('/register' as any)}>
+              <TouchableOpacity style={styles.tab} onPress={() => router.push('/auth/register')}>
                 <Text style={styles.inactiveTabText}>Registrarse</Text>
               </TouchableOpacity>
             </View>
@@ -104,6 +103,7 @@ export default function LoginScreen() {
                   onChangeText={setEmail}
                   autoCapitalize="none"
                   keyboardType="email-address"
+                  editable={!isSubmitting}
                 />
               </View>
 
@@ -112,12 +112,14 @@ export default function LoginScreen() {
               <View style={styles.inputWrapper}>
                 <MaterialCommunityIcons name="lock-outline" size={20} color={Colors.dark.textSecondary} style={styles.inputIcon} />
                 <TextInput
+                  
                   style={[styles.input, { flex: 1 }]}
                   placeholder="Ingresa tu contraseña"
                   placeholderTextColor="#A0AEC0"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
+                  editable={!isSubmitting}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   <MaterialCommunityIcons
@@ -178,11 +180,6 @@ export default function LoginScreen() {
                   <MaterialCommunityIcons name="google" size={20} color="#EA4335" style={{ marginRight: 8 }} />
                   <Text style={styles.socialText}>Google</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity style={styles.socialButton}>
-                  <MaterialCommunityIcons name="apple" size={20} color="#000" style={{ marginRight: 8 }} />
-                  <Text style={styles.socialText}>Apple</Text>
-                </TouchableOpacity>
               </View>
 
             </View>
@@ -203,13 +200,13 @@ export default function LoginScreen() {
             </View>
 
             <Text style={styles.copyrightText}>
-              © 2024 Lumen Veterinary Care. Todos los derechos reservados.
+              © 2026 Lumen Veterinary Care. Todos los derechos reservados.
             </Text>
           </View>
 
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </>
   );
 }
 
