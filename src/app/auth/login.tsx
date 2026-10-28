@@ -1,5 +1,6 @@
-import { Colors } from '@/constants/theme';
+import { Theme } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import useAppTheme from '@/hooks/use-theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -16,7 +17,10 @@ import {
   View
 } from 'react-native';
 
+
 export default function LoginScreen() {
+  const {theme} = useAppTheme();
+  const styles = createStyles(theme);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -54,11 +58,11 @@ export default function LoginScreen() {
           {/* Header Superior con Icono de Ayuda */}
           <View style={styles.headerTop}>
             <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-              <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.dark.text} />
+              <MaterialCommunityIcons name="arrow-left" size={24} color={theme.text} />
             </TouchableOpacity>
             <Text style={styles.brandTitle}>Lumen</Text>
             <TouchableOpacity style={styles.iconButton}>
-              <MaterialCommunityIcons name="help-circle-outline" size={24} color={Colors.dark.text} />
+              <MaterialCommunityIcons name="help-circle-outline" size={24} color={theme.text} />
             </TouchableOpacity>
           </View>
 
@@ -67,9 +71,9 @@ export default function LoginScreen() {
             
             {/* Logo Huella */}
             <View style={styles.logoContainer}>
-              <MaterialCommunityIcons name="paw" size={36} color={Colors.dark.primary} />
+              <MaterialCommunityIcons name="paw" size={36} color={theme.primary} />
               <View style={styles.plusBadge}>
-                <MaterialCommunityIcons name="plus" size={12} color="#FFF" />
+                <MaterialCommunityIcons name="plus" size={12} color={theme.text} />
               </View>
             </View>
 
@@ -94,7 +98,7 @@ export default function LoginScreen() {
               {/* Campo Correo */}
               <Text style={styles.label}>Correo electrónico</Text>
               <View style={styles.inputWrapper}>
-                <MaterialCommunityIcons name="email-outline" size={20} color={Colors.dark.textSecondary} style={styles.inputIcon} />
+                <MaterialCommunityIcons name="email-outline" size={20} color={theme.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="ejemplo@correo.com"
@@ -110,7 +114,7 @@ export default function LoginScreen() {
               {/* Campo Contraseña */}
               <Text style={styles.label}>Contraseña</Text>
               <View style={styles.inputWrapper}>
-                <MaterialCommunityIcons name="lock-outline" size={20} color={Colors.dark.textSecondary} style={styles.inputIcon} />
+                <MaterialCommunityIcons name="lock-outline" size={20} color={theme.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   
                   style={[styles.input, { flex: 1 }]}
@@ -125,7 +129,7 @@ export default function LoginScreen() {
                   <MaterialCommunityIcons
                     name={showPassword ? "eye-outline" : "eye-off-outline"}
                     size={20}
-                    color={Colors.dark.textSecondary}
+                    color={theme.textSecondary}
                   />
                 </TouchableOpacity>
               </View>
@@ -163,7 +167,7 @@ export default function LoginScreen() {
 
                 {/* Botón Biométrico (Huella/FaceID) */}
                 <TouchableOpacity style={styles.biometricButton}>
-                  <MaterialCommunityIcons name="fingerprint" size={26} color={Colors.dark.primary} />
+                  <MaterialCommunityIcons name="fingerprint" size={26} color={theme.primary} />
                 </TouchableOpacity>
               </View>
 
@@ -195,7 +199,7 @@ export default function LoginScreen() {
             </View>
                   
             <View style={styles.secureRow}>
-              <MaterialCommunityIcons name="shield-check-outline" size={16} color={Colors.dark.primary} style={{ marginRight: 4 }} />
+              <MaterialCommunityIcons name="shield-check-outline" size={16} color={theme.primary} style={{ marginRight: 4 }} />
               <Text style={styles.secureText}>ACCESO CLÍNICO SEGURO ENCRIPTADO SSL</Text>
             </View>
 
@@ -210,10 +214,10 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) =>StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+    backgroundColor: theme.background,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -231,15 +235,15 @@ const styles = StyleSheet.create({
   brandTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: Colors.dark.primary,
+    color: theme.primary,
     letterSpacing: 0.5,
   },
   mainCard: {
-    backgroundColor: Colors.dark.cardBackground,
+    backgroundColor: theme.background,
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderColor: theme.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -250,7 +254,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: 64,
     height: 64,
-    backgroundColor: Colors.dark.primaryLight,
+    backgroundColor: theme.primaryLight,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -261,7 +265,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 6,
     right: 6,
-    backgroundColor: Colors.dark.primary,
+    backgroundColor: theme.primary,
     width: 18,
     height: 18,
     borderRadius: 9,
@@ -271,13 +275,13 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.dark.text,
+    color: theme.text,
     textAlign: 'center',
     marginBottom: 6,
   },
   welcomeSubtitle: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
+    color: theme.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 10,
     marginBottom: 24,
@@ -285,7 +289,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.dark.inputBg,
+    backgroundColor: theme.background,
     borderRadius: 14,
     padding: 4,
     marginBottom: 24,
@@ -297,7 +301,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   activeTab: {
-    backgroundColor: Colors.dark.cardBackground,
+    backgroundColor: theme.background,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -306,12 +310,12 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     fontWeight: 'bold',
-    color: Colors.dark.text,
+    color: theme.text,
     fontSize: 14,
   },
   inactiveTabText: {
     fontWeight: '600',
-    color: Colors.dark.textSecondary,
+    color: theme.textSecondary,
     fontSize: 14,
   },
   form: {
@@ -320,15 +324,15 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.dark.text,
+    color: theme.text,
     marginBottom: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.dark.inputBg,
+    backgroundColor: theme.background,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderColor: theme.border,
     borderRadius: 12,
     paddingHorizontal: 14,
     marginBottom: 16,
@@ -340,7 +344,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
-    color: Colors.dark.text,
+    color: theme.text,
   },
   rowBetween: {
     flexDirection: 'row',
@@ -356,24 +360,24 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderWidth: 1.5,
-    borderColor: Colors.dark.border,
+    borderColor: theme.border,
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
-    backgroundColor: Colors.dark.inputBg,
+    backgroundColor: theme.background,
   },
   checkboxChecked: {
-    backgroundColor: Colors.dark.primary,
-    borderColor: Colors.dark.primary,
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
   },
   checkboxLabel: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
+    color: theme.textSecondary,
   },
   forgotText: {
     fontSize: 13,
-    color: Colors.dark.primary,
+    color: theme.primary,
     fontWeight: '600',
   },
   actionRow: {
@@ -383,13 +387,13 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     flex: 1,
-    backgroundColor: Colors.dark.primary,
+    backgroundColor: theme.primary,
     borderRadius: 12,
     height: 52,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.dark.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -403,7 +407,7 @@ const styles = StyleSheet.create({
   biometricButton: {
     width: 52,
     height: 52,
-    backgroundColor: Colors.dark.primaryLight,
+    backgroundColor: theme.primaryLight,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -418,11 +422,11 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.dark.border,
+    backgroundColor: theme.border,
   },
   dividerText: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
+    color: theme.textSecondary,
     paddingHorizontal: 12,
   },
   socialRow: {
@@ -433,9 +437,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     height: 48,
-    backgroundColor: Colors.dark.cardBackground,
+    backgroundColor: theme.background,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderColor: theme.border,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -443,7 +447,7 @@ const styles = StyleSheet.create({
   socialText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.dark.text,
+    color: theme.text,
   },
   footer: {
     marginTop: 24,
@@ -455,11 +459,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
+    color: theme.textSecondary,
   },
   footerLink: {
     fontSize: 13,
-    color: Colors.dark.primary,
+    color: theme.primary,
     fontWeight: 'bold',
   },
   secureRow: {
@@ -470,12 +474,12 @@ const styles = StyleSheet.create({
   secureText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: Colors.dark.primary,
+    color: theme.primary,
     letterSpacing: 0.5,
   },
   copyrightText: {
     fontSize: 11,
-    color: Colors.dark.textSecondary,
+    color: theme.textSecondary,
     textAlign: 'center',
   },
 });

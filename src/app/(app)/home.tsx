@@ -2,9 +2,12 @@ import * as Device from 'expo-device';
 import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import PetsListView from '@/components/pets-list-view';
 import { ThemedText } from '@/components/themed-text';
 import { useAuth } from '@/context/AuthContext';
+import { useGetPets } from '@/hooks/use-pets';
 import { Image } from 'expo-image';
+import { useTheme } from 'expo-router';
 import { Text } from 'expo-router/build/react-navigation';
 
 function getDevMenuHint() {
@@ -27,8 +30,9 @@ function getDevMenuHint() {
 }
 
 export default function App() {
-  const {isAuthenticated, isLoading} = useAuth();
-
+  const { signOut, jwtPayload, profile } = useAuth();
+  const { theme } = useTheme();
+  const {data: pets, error, isLoading} = useGetPets();
   return (
     <SafeAreaView style={styles.container}>
       {/* Header Superior */}
@@ -51,7 +55,7 @@ export default function App() {
         {/* Saludo al usuario */}
         <View style={styles.greetingSection}>
           <View style={styles.greetingRow}>
-            <Text style={styles.greetingText}>Hola, Cooper 👋</Text>
+            <Text style={styles.greetingText}>Hola, {profile?.fullName || 'Usuario'}</Text>
             <View style={styles.activeTag}>
               <View style={styles.dotGreen} />
               <Text style={styles.activeTagText}>Tutor Activo</Text>
@@ -73,69 +77,9 @@ export default function App() {
 
         {/* Carrusel de Mascotas */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.petsHorizontalScroll}>
-          {/* Tarjeta Mascota 1: Max */}
-          <View style={[styles.petCardMini, styles.petCardActiveBorder]}>
-            <View style={styles.petMiniImgContainer}>
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200' }}
-                style={styles.petMiniImg}
-              />
-              <View style={styles.petMiniBadge}>
-                {/* <MaterialCommunityIcons name="dog" size={12} color="#FFF" /> */}
-              </View>
-            </View>
-            <Text style={styles.petMiniName}>Max <Text style={styles.dotGreenInline}>●</Text></Text>
-            <Text style={styles.petMiniBreed} numberOfLines={1}>Labrador Retriever</Text>
-            <View style={styles.petStatusPill}>
-              <Text style={styles.petStatusPillText}>Activo</Text>
-            </View>
-          </View>
-
-          {/* Tarjeta Mascota 2: Bella */}
-          <View style={styles.petCardMini}>
-            <View style={styles.petMiniImgContainer}>
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200' }}
-                style={styles.petMiniImg}
-              />
-              <View style={[styles.petMiniBadge, { backgroundColor: '#4A5568' }]}>
-                {/* <MaterialCommunityIcons name="cat" size={12} color="#FFF" /> */}
-              </View>
-            </View>
-            <Text style={styles.petMiniName}>Bella <Text style={styles.dotOrangeInline}>●</Text></Text>
-            <Text style={styles.petMiniBreed} numberOfLines={1}>Siamés</Text>
-            <View style={[styles.petStatusPill, styles.bgOrangeLight]}>
-              <Text style={[styles.petStatusPillText, styles.textOrange]}>Revisión</Text>
-            </View>
-          </View>
-
-          {/* Tarjeta Mascota 3: Rocky (Inactivo parcial) */}
-          <View style={[styles.petCardMini, styles.cardInactiveOpacity]}>
-            <View style={styles.petMiniImgContainer}>
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=200' }}
-                style={styles.petMiniImg}
-              />
-            </View>
-            <Text style={styles.petMiniName}>Bulldog</Text>
-            <Text style={styles.petMiniBreed}>Inactivo</Text>
-          </View>
+          <PetsListView error={error} isLoading={isLoading} pets={pets} theme={theme} />
         </ScrollView>
 
-        {/* Filtros de Categoría */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-          <TouchableOpacity style={[styles.catChip, styles.catChipActive]}>
-            <Text style={[styles.catChipText, styles.catChipTextActive]}>Todas (2)</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.catChip}>
-            {/*<MaterialCommunityIcons name="dog" size={14} color="#4A5568" style={{ marginRight: 4 }} >*/}
-            <Text style={styles.catChipText}>Perros (1)</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.catChip}>
-            {/*<MaterialCommunityIcons name="cat" size={14} color="#4A5568" style={{ marginRight: 4 }} /> */}
-            <Text style={styles.catChipText}>Felinos (1)</Text>
-          </TouchableOpacity>
-        </ScrollView>
 
         {/* Tarjeta de Información Detallada: Max */}
         <View style={styles.mainCard}>

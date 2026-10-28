@@ -12,7 +12,7 @@ export const authService = {
     },  
     signUp: async (data: SignUpRequest): Promise<SignUpResponse> => {
         try{
-            const response = await instance.post('/auth/signup', data);
+            const response = await instance.post<SignUpResponse>('/auth/signup', data);
             return response.data;
         }catch (error) {
             handleConnectionError(error, 'signup');

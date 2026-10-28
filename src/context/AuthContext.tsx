@@ -1,5 +1,5 @@
 import { authService } from '@/services/authService';
-import { JwtPayload, SignInRequest, SignInResponse } from '@/types/authTypes';
+import { JwtPayload, ProfileDetails, SignInRequest, SignInResponse } from '@/types/authTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from "jwt-decode";
 import React, { createContext, useEffect, useMemo, useState } from 'react';
@@ -12,6 +12,7 @@ interface AuthContextType {
   jwtPayload: JwtPayload | null;
   signIn: (data: SignInRequest) => Promise<SignInResponse>;
   signOut: () => void;
+  profile: ProfileDetails | null; // Puedes definir un tipo más específico si lo deseas
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -20,6 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setTokenRaw] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [profile, setProfile] = useState<ProfileDetails | null>(null);
   const setToken = (newToken: string | null) => {
     if (newToken) {
       AsyncStorage.setItem("token", newToken);
@@ -34,15 +36,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const bootstrapAsync = async () => {
       setIsLoading(true);
+      const storedProfile = await AsyncStorage
+      .getItem('profile')
+      .then((data) => setProfile(JSON.parse(data || '{}') as ProfileDetails))
+      .catch((e) => {
+        console.error("Error al leer el perfil", e);
+      });
       AsyncStorage.getItem('token').then((storedToken) => {
         if (storedToken) {
           setToken(storedToken);
+          setIsAuthenticated(true);
         }
       }).catch((e) => {
         // Manejar error de lectura
-      }).finally(() => {
-        setIsLoading(false);
-      });
+      })
+      setIsLoading(false);
     };
     bootstrapAsync();
   }, []);
@@ -74,7 +82,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     try {
       const data: SignInResponse = await authService.signIn(credentials);
+      
       if (data?.accessToken) {
+        setProfile(data.user);
         setToken(data.accessToken);
       }
       return data;
@@ -85,9 +95,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
     }
   };
+
   const signOut = (): void =>{
+    setIsAuthenticated(false);
+    setProfile(null);
     setToken(null);
   }
+  const userData = useMemo(() => {
+    if (!jwtPayload || !profile) return null;
+    return {
+      ...jwtPayload,
+      ...profile
+    };
+  }, [jwtPayload, profile]);
+  // Si el token es inválido o expiró, cerramos sesión automáticamente
   useEffect(() => {
   if (token && !jwtPayload) {
     signOut();
@@ -99,6 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut: signOut,
     isAuthenticated: isAuthenticated,
     isLoading: isLoading,
+    profile: profile,
   };
 
   return (

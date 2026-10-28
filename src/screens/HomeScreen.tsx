@@ -1,45 +1,79 @@
-import { getPetsByOwner, Pet } from '@/services/petService';
-import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { Spacing, Theme, Typography } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
+import { useGetPets } from '@/hooks/use-pets';
+
+const CURRENT_OWNER_ID = '123'; // TODO: mover a AuthContext/Store
+
 export default function HomeScreen() {
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { theme } = useTheme();
+  const { data: pets, isLoading, error } = useGetPets();
 
-  useEffect(() => {
-    loadPets();
-  }, []);
+  const styles = createStyles(theme);
 
-  const loadPets = async () => {
-    try {
-      // Supongamos que el ID del tutor actual (Cooper) es '123'
-      const data = await getPetsByOwner('123');
-      setPets(data);
-    } catch (error) {
-      // Manejar error de conexión (mostrar alerta, estado vacío, etc.)
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#0E6251" />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorTitle}>No pudimos cargar tus mascotas</Text>
+        <Text style={styles.errorSubtitle}>
+          Revisa tu conexión e inténtalo de nuevo.
+        </Text>
+        {/* <Button title="Reintentar" onPress={refetch} /> */}
+      </View>
+    );
+  }
+  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mis Mascotas desde el Servidor</Text>
-      {/* Renderizar tu lista de mascotas aquí */}
+      {/* TODO: <PetList pets={pets} /> */}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#F8F9FA' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 18, fontWeight: 'bold', color: '#1A2E3B' },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: Spacing.lg,
+      backgroundColor: theme.background,
+    },
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: Spacing.lg,
+      backgroundColor: theme.background,
+    },
+    title: {
+      fontSize: Typography.size.xxl,
+      fontWeight: Typography.weight.bold,
+      color: theme.textPrimary,
+      marginBottom: Spacing.xs,
+    },
+    subtitle: {
+      fontSize: Typography.size.base,
+      color: theme.textTertiary,
+    },
+    errorTitle: {
+      fontSize: Typography.size.lg,
+      fontWeight: Typography.weight.semibold,
+      color: theme.textPrimary,
+      textAlign: 'center',
+      marginBottom: Spacing.xs,
+    },
+    errorSubtitle: {
+      fontSize: Typography.size.base,
+      color: theme.textTertiary,
+      textAlign: 'center',
+    },
+  });
+

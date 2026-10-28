@@ -1,14 +1,18 @@
 import { AuthProvider } from '@/context/AuthContext';
-import { DarkTheme, DefaultTheme, Slot, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Slot } from 'expo-router';
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <Slot />
-      </AuthProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <Slot />
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
