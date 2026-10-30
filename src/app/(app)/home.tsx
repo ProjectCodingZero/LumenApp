@@ -1,14 +1,14 @@
 import * as Device from 'expo-device';
-import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { HomeNavView } from '@/components/home-nav-view';
 import PetsListView from '@/components/pets-list-view';
 import { ThemedText } from '@/components/themed-text';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 import { useGetPets } from '@/hooks/use-pets';
+import { useTheme } from '@/hooks/use-theme';
 import { Image } from 'expo-image';
-import { useTheme } from 'expo-router';
-import { Text } from 'expo-router/build/react-navigation';
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -253,27 +253,8 @@ export default function App() {
       <TouchableOpacity style={styles.floatingBtn}>
         {/* <Ionicons name="add" size={28} color="#FFF" /> */}
       </TouchableOpacity>
-
-      {/* Barra de Navegación Inferior */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          {/* <MaterialCommunityIcons name="paw" size={22} color="#1ABC9C" /> */}
-          <Text style={[styles.navText, styles.navTextActive]}>Mascotas</Text>
-          <View style={styles.navDotActive} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          {/* <Ionicons name="calendar-outline" size={22} color="#839192" /> */}
-          <Text style={styles.navText}>Turnos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          {/* <Ionicons name="medkit-outline" size={22} color="#839192" /> */}
-          <Text style={styles.navText}>Especialistas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          {/* <Ionicons name="person-outline" size={22} color="#839192" /> */}
-          <Text style={styles.navText}>Perfil</Text>
-        </TouchableOpacity>
-      </View>
+      <HomeNavView theme={theme} />
+      
     </SafeAreaView>
   );
 }

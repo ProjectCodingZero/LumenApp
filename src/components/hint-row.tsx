@@ -20,7 +20,7 @@ export function HintRow({ title = 'Try editing', hint = 'app/index.tsx' }: HintR
       <ThemedView
         style={[
           styles.codeSnippet,
-          { backgroundColor: theme.backgroundSelected || theme.primaryLight },
+          { backgroundColor: theme.background || theme.primaryLight },
         ]}
       >
         <ThemedText themeColor="textSecondary">{hint}</ThemedText>

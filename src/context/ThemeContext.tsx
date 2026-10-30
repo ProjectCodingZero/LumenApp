@@ -97,10 +97,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     return null;
   }
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+  <ThemeContext.Provider value={value}>
+    {children}
+    </ThemeContext.Provider>
+  );
 };
 
-export const useTheme = () => useContext(ThemeContext);
+export const useThemeContext = () => useContext(ThemeContext);
 
 export { Colors, darkColors, getColors, lightColors, type ColorScheme, type Theme };
 

@@ -1,4 +1,3 @@
-import { useTheme as useAppTheme } from '@/context/ThemeContext';
+import { useThemeContext } from '@/context/ThemeContext';
 
-export const useTheme = useAppTheme;
-export default useAppTheme;
+export const useTheme = useThemeContext;

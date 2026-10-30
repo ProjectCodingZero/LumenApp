@@ -1,6 +1,7 @@
 import { authService } from '@/services/authService';
 import { JwtPayload, ProfileDetails, SignInRequest, SignInResponse } from '@/types/authTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { jwtDecode } from "jwt-decode";
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 // Podrías usar AsyncStorage para guardar el token permanentemente:
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (storedToken) {
           setToken(storedToken);
           setIsAuthenticated(true);
+          router.replace('/home');
         }
       }).catch((e) => {
         // Manejar error de lectura
@@ -97,6 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = (): void =>{
+    router.replace('/auth/login');
     setIsAuthenticated(false);
     setProfile(null);
     setToken(null);
@@ -130,4 +133,4 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useAuth = () => React.useContext(AuthContext);
+export const useAuthContext = () => React.useContext(AuthContext);

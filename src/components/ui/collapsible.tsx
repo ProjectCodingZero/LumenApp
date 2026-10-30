@@ -18,7 +18,7 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
         style={({ pressed }) => [styles.heading, pressed && styles.pressedHeading]}
         onPress={() => setIsOpen((value) => !value)}
       >
-        <ThemedView style={[styles.button, { backgroundColor: theme.backgroundElement || theme.surface }]}>
+        <ThemedView style={[styles.button, { backgroundColor: theme.background || theme.surface }]}>
           <SymbolView
             name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
             size={14}
@@ -32,7 +32,7 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
       </Pressable>
       {isOpen && (
         <Animated.View entering={FadeIn.duration(200)}>
-          <ThemedView style={[styles.content, { backgroundColor: theme.backgroundElement || theme.surface }]}>
+          <ThemedView style={[styles.content, { backgroundColor: theme.background || theme.surface }]}>
             {children}
           </ThemedView>
         </Animated.View>

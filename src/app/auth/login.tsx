@@ -1,6 +1,6 @@
 import { Theme } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
-import useAppTheme from '@/hooks/use-theme';
+import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ import {
 
 
 export default function LoginScreen() {
-  const {theme} = useAppTheme();
+  const {theme} = useTheme();
   const styles = createStyles(theme);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
