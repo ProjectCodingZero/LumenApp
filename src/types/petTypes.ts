@@ -11,16 +11,27 @@ export interface ResponsePetCreate {
     id: string;
 }
 
-export interface ResponsePet{
+export interface ResponsePetMinimun{
   id: string;
-  raceId: string;
   race: string;
-  specieId: string;
   specie: string;
   name: string;
   years: number;
   months: number;
   birthDate: Date;
   status: Status;
-  genderType: GenderType;
+  gender: GenderType;
+}
+export interface ResponsePet{
+    id: string,
+    raceId: string,
+    race: string,
+    specieId: string,
+    specie: string,
+    name: string,
+    years: number,
+    months: number,
+    birthDate: Date,
+    status: Status,
+    gender: GenderType
 }

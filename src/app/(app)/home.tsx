@@ -33,6 +33,7 @@ export default function App() {
   const { signOut, jwtPayload, profile } = useAuth();
   const { theme } = useTheme();
   const {data: pets, error, isLoading} = useGetPets();
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header Superior */}

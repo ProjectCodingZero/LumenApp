@@ -3,7 +3,7 @@ import { instance } from './apiClient';
 export const authService = {
     signIn: async (data: SignInRequest): Promise<SignInResponse> => {
         try{
-            const response = await instance.post('/auth/signin', data);
+            const response = await instance.post('auth/signin', data);
             return response.data;
         }catch (error) {
             handleConnectionError(error, 'signin');
@@ -12,7 +12,7 @@ export const authService = {
     },  
     signUp: async (data: SignUpRequest): Promise<SignUpResponse> => {
         try{
-            const response = await instance.post<SignUpResponse>('/auth/signup', data);
+            const response = await instance.post<SignUpResponse>('auth/signup', data);
             return response.data;
         }catch (error) {
             handleConnectionError(error, 'signup');

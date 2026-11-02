@@ -1,15 +1,32 @@
 import { Theme } from '@/context/ThemeContext';
+import { ResponsePetMinimun } from '@/types/petTypes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter, useSegments } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 interface PetsListViewProps {
   theme: Theme;
-  pets: any;
+  pets: ResponsePetMinimun[] | undefined;
   isLoading: boolean;
   error: any;
 }
 export default function PetsListView({ theme, pets, isLoading, error }: PetsListViewProps) {
   const styles = getStyles(theme);
+  const router = useRouter();
+  const onPetPress = (petId: string) => {
+    // Aquí podrías navegar a una pantalla de detalles de la mascota
+    console.log(`Mascota seleccionada: ${petId}`);
+    // Navegar a la pantalla de detalles
+    const segments = useSegments(); 
+    const petDetailPath = `/pets/${petId}`; // Ajusta la ruta según tu estructura de navegación
+    router.push(`/pets/[id]?id=${petId}`); // Navega a la pantalla de detalles de la mascota
+    /*
+    {
+      pathname: `/pets/${petId}`, // Ruta dinámica para la mascota seleccionada
+      params: { id: petId }
+    }
+    */
+  }
   // 1. Manejo de carga
   if (isLoading) {
     return (
@@ -45,14 +62,27 @@ export default function PetsListView({ theme, pets, isLoading, error }: PetsList
           data={pets}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.petName}>{item.name}</Text>
-              <Text style={styles.petBreed}>{item.race}</Text>
-              <Text style={styles.petBreed}>Estado: {item.status}</Text>
-              <Text style={styles.petBreed}>Género: {item.genderType}</Text>
-              <Text style={styles.petBreed}>Edad: Años:{item.years} Meses:{item.months}</Text>
-              <Text style={styles.petBreed}>Edad: Años:{item.status}</Text>
-            </View>
+            <TouchableOpacity onPress={() => {
+                const petId = item.id.toString();
+                
+                // Aquí podrías navegar a una pantalla de detalles de la mascota
+                console.log(`Mascota seleccionada: ${petId}`);
+                const petDetailPath = `/pets/${petId}`; // Ajusta la ruta según tu estructura de navegación
+                // router.push(`/pets/[id]?id=${petId}`); // Navega a la pantalla de detalles de la mascota
+                router.push({
+                  pathname: `/pets/[id]`, // Ruta dinámica para la mascota seleccionada
+                  params: { id: petId }
+                })
+            }} style={styles.card}>
+              <View>
+                <Text style={styles.petName}>{item.name}</Text>
+                <Text style={styles.petBreed}>{item.specie} - {item.race}</Text>
+                <Text style={styles.petBreed}>Estado: {item.status}</Text>
+                <Text style={styles.petBreed}>Género: {item.gender}</Text>
+                <Text style={styles.petBreed}>Años: {item.years} - Meses: {item.months}</Text>
+                <Text style={styles.petBreed}>Estado: {item.status}</Text>
+              </View>
+            </TouchableOpacity>
           )}
         />
       )}

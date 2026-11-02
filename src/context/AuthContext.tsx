@@ -1,3 +1,4 @@
+import { AUTH_STORAGE_KEY, PROFILE_STORAGE_KEY } from '@/constants/storage';
 import { authService } from '@/services/authService';
 import { JwtPayload, ProfileDetails, SignInRequest, SignInResponse } from '@/types/authTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,33 +18,47 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  // Estado para manejar el token JWT
   const [token, setTokenRaw] = useState<string | null>(null);
+  // Estado para manejar si la app está cargando (por ejemplo, verificando el token)
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Estado para manejar si el usuario está autenticado o no
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [profile, setProfile] = useState<ProfileDetails | null>(null);
+  // Almacena el perfil del usuario en el estado
+  const [profile, setRawProfile] = useState<ProfileDetails | null>(null);
+  // Referencia para manejar el timeout de expiración del token
+  const timeoutRef = React.useRef<any>(null);
   const setToken = (newToken: string | null) => {
     if (newToken) {
-      AsyncStorage.setItem("token", newToken);
+      AsyncStorage.setItem(AUTH_STORAGE_KEY, newToken);
       setIsAuthenticated(true);
     } else {
-      AsyncStorage.removeItem("token");
+      AsyncStorage.removeItem(AUTH_STORAGE_KEY);
       setIsAuthenticated(false);
     }
     setTokenRaw(newToken);
+  };
+  const setProfile = (newProfile: ProfileDetails | null) => {
+    if (newProfile) {
+      AsyncStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
+    } else {
+      AsyncStorage.removeItem(PROFILE_STORAGE_KEY);
+    }
+    setRawProfile(newProfile);
   };
   // Al abrir la app, verificamos si hay un token guardado localmente
   useEffect(() => {
     const bootstrapAsync = async () => {
       setIsLoading(true);
+      // Cargamos el perfil del usuario desde AsyncStorage
       const storedProfile = await AsyncStorage
-      .getItem('profile')
+      .getItem(PROFILE_STORAGE_KEY)
       .then((data) => setProfile(JSON.parse(data || '{}') as ProfileDetails))
       .catch((e) => {
         console.error("Error al leer el perfil", e);
       });
-      AsyncStorage.getItem('token').then((storedToken) => {
+      AsyncStorage.getItem(AUTH_STORAGE_KEY).then((storedToken) => {
         if (storedToken) {
           setToken(storedToken);
           setIsAuthenticated(true);
@@ -56,6 +71,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     bootstrapAsync();
   }, []);
+  const signoutTimer = (exp: number) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    const delay = (exp * 1000) - Date.now();
+    if(delay <= 0) {
+      signOut();
+      return;
+    }else{
+      timeoutRef.current = setTimeout(() => {
+        signOut();
+      }, delay);
+    }
+  };
+  // Decodifica el token JWT para obtener la información del usuario
   const jwtPayload = useMemo<JwtPayload | null>(() => {
     if (!token) return null;
     try {
@@ -88,6 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (data?.accessToken) {
         setProfile(data.user);
         setToken(data.accessToken);
+        router.replace('/home');
       }
       return data;
     } catch (error) {
@@ -104,6 +135,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setProfile(null);
     setToken(null);
   }
+  useEffect(() => {
+    if (jwtPayload && jwtPayload.exp) {
+      signoutTimer(jwtPayload.exp);
+    }
+    
+    // Limpieza al desmontar el provider o cambiar el token
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [jwtPayload]);
+  // Combina los datos del payload JWT y el perfil del usuario
   const userData = useMemo(() => {
     if (!jwtPayload || !profile) return null;
     return {
@@ -125,7 +169,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading: isLoading,
     profile: profile,
   };
-
   return (
     <AuthContext.Provider value={authContext}>
       {children}

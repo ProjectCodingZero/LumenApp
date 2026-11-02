@@ -10,6 +10,8 @@ export function useGetPets(){
   return useQuery({
     queryKey: ['pets'],
     queryFn: petService.getPetsByOwner,
+    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
+    refetchOnWindowFocus: true, // Refetch when the window regains focus
   });
 }
 export function useCreatePet(){
@@ -21,3 +23,16 @@ export function useCreatePet(){
     },
   });
 }
+interface usePetsIdProps {
+  petId: string;
+  autoFetch?: boolean;
+};
+export function usePetsId({ petId, autoFetch = true }: usePetsIdProps) {
+
+  return useQuery({
+    queryKey: ['pets', petId],
+    queryFn: () => petService.getPetById(petId),
+    enabled: autoFetch,
+    refetchOnWindowFocus: true, // Refetch when the window regains focus
+  })
+};
