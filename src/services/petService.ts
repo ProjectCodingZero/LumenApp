@@ -1,14 +1,14 @@
+import { ResponseMedicalRecord } from '@/types/medicalRecordTypes';
 import {
   RequestCreatePet,
   RequestUpdatePet,
   ResponsePet,
   ResponsePetMinimun,
 } from '@/types/petTypes';
-import { ResponseMedicalRecord } from '@/types/medicalRecordTypes';
 import { instance } from './apiClient';
 
 /** Tamaño de página razonable para la lista de "Mis mascotas" */
-const PETS_PAGE_SIZE = 50;
+const PETS_PAGE_SIZE = 10;
 
 interface PaginatedParams {
   pageNumber?: number;

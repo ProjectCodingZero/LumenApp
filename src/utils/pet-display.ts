@@ -46,6 +46,31 @@ export function formatBirthDate(isoDate: string): string {
   return `${day}/${month}/${year}`;
 }
 
+/** Formatea un Date local como dd/mm/aaaa */
+export function formatDate(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+}
+
+/** Convierte un Date local a string ISO (YYYY-MM-DD) sin corrimiento de zona horaria */
+export function toIsoDate(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Años y meses cumplidos desde una fecha de nacimiento hasta hoy */
+export function getAgeFromBirthDate(birthDate: Date): { years: number; months: number } {
+  const now = new Date();
+  let years = now.getFullYear() - birthDate.getFullYear();
+  let months = now.getMonth() - birthDate.getMonth();
+  if (now.getDate() < birthDate.getDate()) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  return { years: Math.max(years, 0), months: Math.max(months, 0) };
+}
+
 /** Nombre propio de la especie para el icono de avatar */
 export function getSpecieIconName(specie: string): 'dog' | 'cat' | 'paw' {
   const normalized = specie?.toLowerCase() ?? '';

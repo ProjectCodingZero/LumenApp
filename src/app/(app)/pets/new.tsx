@@ -1,3 +1,4 @@
+import { DateField } from '@/components/ui/date-field';
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { useTheme } from '@/hooks/use-theme';
@@ -5,6 +6,7 @@ import { useRacesBySpecie, useSpecies } from '@/hooks/use-species';
 import { useCreatePet } from '@/hooks/use-pets';
 import { getApiErrorMessage } from '@/services/apiError';
 import { GenderType, PetStatus } from '@/types/petTypes';
+import { toIsoDate } from '@/utils/pet-display';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
@@ -18,24 +20,8 @@ const GENDERS: { value: GenderType; label: string; icon: 'gender-male' | 'gender
   { value: 'Other', label: 'Otro', icon: 'gender-male-female' },
 ];
 
-function buildBirthDate(day: string, month: string, year: string): string | null {
-  const d = Number(day);
-  const m = Number(month);
-  const y = Number(year);
-  if (!d || !m || !y) return null;
-  const date = new Date(y, m - 1, d);
-  if (
-    date.getFullYear() !== y ||
-    date.getMonth() !== m - 1 ||
-    date.getDate() !== d ||
-    y < 1900 ||
-    date.getTime() > Date.now()
-  ) {
-    return null;
-  }
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${y}-${pad(m)}-${pad(d)}`;
-}
+/** Rango de fechas de nacimiento aceptado por el backend */
+const MIN_BIRTH_DATE = new Date(1900, 0, 1);
 
 export default function NewPetScreen() {
   const { theme } = useTheme();
@@ -49,9 +35,7 @@ export default function NewPetScreen() {
   const [name, setName] = useState('');
   const [raceId, setRaceId] = useState('');
   const [gender, setGender] = useState<GenderType | null>(null);
-  const [birthDay, setBirthDay] = useState('');
-  const [birthMonth, setBirthMonth] = useState('');
-  const [birthYear, setBirthYear] = useState('');
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [errors, setErrors] = useState<{ name?: string; birthDate?: string; race?: string; gender?: string }>({});
 
   const createPet = useCreatePet();
@@ -70,8 +54,7 @@ export default function NewPetScreen() {
     if (!specieId) nextErrors.race = 'Elegí una especie y una raza.';
     else if (!raceId) nextErrors.race = 'Elegí la raza de tu mascota.';
     if (!gender) nextErrors.gender = 'Elegí el género de tu mascota.';
-    const birthDate = buildBirthDate(birthDay, birthMonth, birthYear);
-    if (!birthDate) nextErrors.birthDate = 'Ingresá una fecha de nacimiento válida.';
+    if (!birthDate) nextErrors.birthDate = 'Elegí la fecha de nacimiento en el calendario.';
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
       Toast.show({ type: 'info', text1: 'Revisá el formulario', text2: 'Hay campos incompletos o con errores.' });
@@ -84,7 +67,7 @@ export default function NewPetScreen() {
     createPet.mutate(
       {
         name: name.trim(),
-        birthDate,
+        birthDate: toIsoDate(birthDate),
         status: 'Alive' as PetStatus,
         raceId,
         gender,
@@ -200,50 +183,20 @@ export default function NewPetScreen() {
         )}
         {errors.race ? <Text style={styles.errorText}>{errors.race}</Text> : null}
 
-        {/* Fecha de nacimiento */}
-        <Text style={styles.label}>Fecha de nacimiento</Text>
-        <View style={styles.dateRow}>
-          <FormInput
-            placeholder="Día"
-            value={birthDay}
-            onChangeText={(value) => {
-              setBirthDay(value.replace(/\D/g, '').slice(0, 2));
-              setErrors((prev) => ({ ...prev, birthDate: undefined }));
-            }}
-            keyboardType="number-pad"
-            maxLength={2}
-            style={styles.dayInput}
-            wrapperStyle={styles.dateInput}
-            error={null}
-          />
-          <FormInput
-            placeholder="Mes"
-            value={birthMonth}
-            onChangeText={(value) => {
-              setBirthMonth(value.replace(/\D/g, '').slice(0, 2));
-              setErrors((prev) => ({ ...prev, birthDate: undefined }));
-            }}
-            keyboardType="number-pad"
-            maxLength={2}
-            style={styles.dayInput}
-            wrapperStyle={styles.dateInput}
-            error={null}
-          />
-          <FormInput
-            placeholder="Año"
-            value={birthYear}
-            onChangeText={(value) => {
-              setBirthYear(value.replace(/\D/g, '').slice(0, 4));
-              setErrors((prev) => ({ ...prev, birthDate: undefined }));
-            }}
-            keyboardType="number-pad"
-            maxLength={4}
-            style={styles.yearInput}
-            wrapperStyle={styles.dateInput}
-            error={null}
-          />
-        </View>
-        {errors.birthDate ? <Text style={styles.errorText}>{errors.birthDate}</Text> : null}
+        {/* Fecha de nacimiento: calendario nativo con confirmación en vivo */}
+        <DateField
+          label="Fecha de nacimiento"
+          value={birthDate}
+          onChange={(date) => {
+            setBirthDate(date);
+            setErrors((prev) => ({ ...prev, birthDate: undefined }));
+          }}
+          error={errors.birthDate}
+          placeholder="Elegí la fecha en el calendario"
+          minimumDate={MIN_BIRTH_DATE}
+          maximumDate={new Date()}
+          disabled={createPet.isPending}
+        />
 
         {/* Género */}
         <Text style={styles.label}>Género</Text>
@@ -347,20 +300,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>['theme']) =>
     chipTextActive: {
       color: theme.primary,
       fontWeight: '600',
-    },
-    dateRow: {
-      flexDirection: 'row',
-      gap: 10,
-      marginBottom: 16,
-    },
-    dateInput: {
-      marginBottom: 0,
-    },
-    dayInput: {
-      textAlign: 'center',
-    },
-    yearInput: {
-      textAlign: 'center',
     },
     hintText: {
       fontSize: 13,
