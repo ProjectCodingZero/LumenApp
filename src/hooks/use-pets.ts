@@ -2,37 +2,55 @@ import { petService } from '@/services/petService';
 import { RequestCreatePet } from '@/types/petTypes';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-type UsePetsOptions = {
-  ownerId?: string;
-  autoFetch?: boolean;
+/** Claves de query centralizadas para invalidación consistente */
+export const petKeys = {
+  all: ['pets'] as const,
+  mine: () => [...petKeys.all, 'mine'] as const,
+  detail: (petId: string) => [...petKeys.all, 'detail', petId] as const,
+  medicalRecords: (petId: string) => [...petKeys.detail(petId), 'medical-records'] as const,
 };
-export function useGetPets(){
+
+export function useGetPets() {
   return useQuery({
-    queryKey: ['pets'],
-    queryFn: petService.getPetsByOwner,
-    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
-    refetchOnWindowFocus: true, // Refetch when the window regains focus
+    queryKey: petKeys.mine(),
+    queryFn: () => petService.getPetsByOwner(),
+    staleTime: 60 * 1000,
   });
 }
-export function useCreatePet(){
+
+export function usePetsId(petId: string) {
+  return useQuery({
+    queryKey: petKeys.detail(petId),
+    queryFn: () => petService.getPetById(petId),
+    enabled: petId.length > 0,
+  });
+}
+
+export function useMedicalRecords(petId: string) {
+  return useQuery({
+    queryKey: petKeys.medicalRecords(petId),
+    queryFn: () => petService.getMedicalRecords(petId),
+    enabled: petId.length > 0,
+  });
+}
+
+export function useCreatePet() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (petData: RequestCreatePet) => petService.createPetByOwner(petData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pets'] });
+      queryClient.invalidateQueries({ queryKey: petKeys.mine() });
     },
   });
 }
-interface usePetsIdProps {
-  petId: string;
-  autoFetch?: boolean;
-};
-export function usePetsId({ petId, autoFetch = true }: usePetsIdProps) {
 
-  return useQuery({
-    queryKey: ['pets', petId],
-    queryFn: () => petService.getPetById(petId),
-    enabled: autoFetch,
-    refetchOnWindowFocus: true, // Refetch when the window regains focus
-  })
-};
+export function useDeletePet() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (petId: string) => petService.deletePetById(petId),
+    onSuccess: (_data, petId) => {
+      queryClient.removeQueries({ queryKey: petKeys.detail(petId) });
+      queryClient.invalidateQueries({ queryKey: petKeys.mine() });
+    },
+  });
+}

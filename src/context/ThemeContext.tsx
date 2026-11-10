@@ -1,5 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 
 import { Colors, darkColors, getColors, lightColors, Theme, type ColorScheme } from '@/constants/theme';
@@ -28,17 +35,11 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         const stored = await AsyncStorage.getItem(THEME_STORAGE_KEY);
         if (stored === 'light' || stored === 'dark') {
           setSchemeState(stored);
-        } else if (systemScheme === 'dark') {
-          setSchemeState('dark');
         } else {
-          setSchemeState('light');
+          setSchemeState(systemScheme === 'dark' ? 'dark' : 'light');
         }
-      } catch (error) {
-        if (systemScheme === 'dark') {
-          setSchemeState('dark');
-        } else {
-          setSchemeState('light');
-        }
+      } catch {
+        setSchemeState(systemScheme === 'dark' ? 'dark' : 'light');
       } finally {
         setIsReady(true);
       }
@@ -47,36 +48,27 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     loadTheme();
   }, [systemScheme]);
 
-  const setScheme = async (newScheme: ColorScheme) => {
+  const setScheme = useCallback(async (newScheme: ColorScheme) => {
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, newScheme);
-      setSchemeState(newScheme);
-    } catch (error) {
-      setSchemeState(newScheme);
+    } catch {
+      // Si falla el guardado, igualmente se aplica el tema en memoria.
     }
-  };
+    setSchemeState(newScheme);
+  }, []);
 
-  const toggleTheme = async () => {
-    const newScheme = scheme === 'dark' ? 'light' : 'dark';
-    await setScheme(newScheme);
-  };
+  const toggleTheme = useCallback(async () => {
+    await setScheme(scheme === 'dark' ? 'light' : 'dark');
+  }, [scheme, setScheme]);
 
-  const resetToSystem = async () => {
+  const resetToSystem = useCallback(async () => {
     try {
       await AsyncStorage.removeItem(THEME_STORAGE_KEY);
-      if (systemScheme === 'dark') {
-        setSchemeState('dark');
-      } else {
-        setSchemeState('light');
-      }
-    } catch (error) {
-      if (systemScheme === 'dark') {
-        setSchemeState('dark');
-      } else {
-        setSchemeState('light');
-      }
+    } catch {
+      // Sin persistencia: se aplica el tema del sistema igualmente.
     }
-  };
+    setSchemeState(systemScheme === 'dark' ? 'dark' : 'light');
+  }, [systemScheme]);
 
   const theme = useMemo(() => getColors(scheme), [scheme]);
   const isDark = scheme === 'dark';
@@ -90,7 +82,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       toggleTheme,
       resetToSystem,
     }),
-    [scheme, isDark, theme]
+    [scheme, isDark, theme, setScheme, toggleTheme, resetToSystem]
   );
 
   if (!isReady) {
@@ -98,8 +90,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-  <ThemeContext.Provider value={value}>
-    {children}
+    <ThemeContext.Provider value={value}>
+      {children}
     </ThemeContext.Provider>
   );
 };
@@ -107,4 +99,3 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 export const useThemeContext = () => useContext(ThemeContext);
 
 export { Colors, darkColors, getColors, lightColors, type ColorScheme, type Theme };
-
